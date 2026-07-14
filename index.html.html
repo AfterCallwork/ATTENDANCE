@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Class Attendance Checker</title>
+<style>
+  :root{
+    --ink:#1f2a24;
+    --paper:#f6f3ea;
+    --card:#ffffff;
+    --line:#d9d2bf;
+    --green:#3f6b4f;
+    --green-dark:#2c4d38;
+    --amber:#b8863c;
+    --rust:#a44a3f;
+    --slate:#5c6b7a;
+    --muted:#8b8574;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    color:var(--ink);
+  }
+  .wrap{max-width:720px;margin:0 auto;padding:18px 14px 60px;}
+
+  /* header */
+  .masthead{
+    border-bottom:3px double var(--ink);
+    padding-bottom:10px;
+    margin-bottom:14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .masthead h1{
+    font-size:20px;
+    margin:0;
+    letter-spacing:0.02em;
+    font-weight:800;
+  }
+  .masthead .sub{font-size:11.5px;color:var(--muted);margin-top:2px;}
+  .datebox{
+    display:flex;align-items:center;gap:8px;
+    font-size:13px;
+  }
+  .datebox input[type=date]{
+    border:1px solid var(--line);
+    background:var(--card);
+    padding:6px 8px;
+    border-radius:6px;
+    font-size:13px;
+    color:var(--ink);
+  }
+
+  /* tabs */
+  .tabs{display:flex;gap:6px;margin-bottom:14px;}
+  .tab{
+    flex:1;
+    text-align:center;
+    padding:9px 8px;
+    border:1px solid var(--line);
+    background:var(--card);
+    border-radius:8px;
+    font-size:13px;
+    font-weight:700;
+    cursor:pointer;
+    color:var(--slate);
+  }
+  .tab.active{
+    background:var(--green-dark);
+    border-color:var(--green-dark);
+    color:#fff;
+  }
+
+  /* progress */
+  .progress-row{
+    display:flex;justify-content:space-between;align-items:center;
+    font-size:12.5px;color:var(--slate);margin-bottom:10px;
+  }
+  .progress-bar{
+    height:6px;background:#e7e1d0;border-radius:4px;overflow:hidden;flex:1;margin:0 10px;
+  }
+  .progress-fill{height:100%;background:var(--green);width:0%;transition:width .25s;}
+
+  /* roster */
+  .section-label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--muted);
+    margin:16px 0 6px;
+    font-weight:700;
+  }
+  .roster{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+  .row{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 12px;
+    border-bottom:1px solid #eee7d6;
+    gap:10px;
+  }
+  .row:last-child{border-bottom:none;}
+  .row.done{background:#fbfaf5;}
+  .name{
+    font-size:13.5px;
+    font-weight:600;
+    flex:1;
+    min-width:0;
+  }
+  .no{
+    font-size:11px;color:var(--muted);width:20px;flex-shrink:0;
+  }
+  .name .full{display:block;}
+  .name .status-tag{
+    display:inline-block;
+    font-size:10px;
+    font-weight:700;
+    margin-top:2px;
+    padding:1px 6px;
+    border-radius:4px;
+  }
+  .btns{display:flex;gap:5px;flex-shrink:0;}
+  .btn{
+    border:1px solid var(--line);
+    background:#fff;
+    font-size:11.5px;
+    font-weight:700;
+    padding:6px 9px;
+    border-radius:6px;
+    cursor:pointer;
+    color:var(--slate);
+    line-height:1;
+  }
+  .btn:active{transform:scale(0.96);}
+  .btn.P.on{background:var(--green);border-color:var(--green);color:#fff;}
+  .btn.A.on{background:var(--rust);border-color:var(--rust);color:#fff;}
+  .btn.HD.on{background:var(--amber);border-color:var(--amber);color:#fff;}
+  .btn.E.on{background:var(--slate);border-color:var(--slate);color:#fff;}
+
+  .actions{display:flex;gap:8px;margin-top:16px;}
+  .action-btn{
+    flex:1;
+    padding:12px;
+    border-radius:10px;
+    border:none;
+    font-size:14px;
+    font-weight:800;
+    cursor:pointer;
+  }
+  .action-btn.primary{background:var(--green-dark);color:#fff;}
+  .action-btn.ghost{background:#fff;border:1px solid var(--line);color:var(--slate);}
+
+  /* summary cards */
+  .summary-card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:14px;
+    margin-bottom:12px;
+  }
+  .summary-card h3{
+    margin:0 0 10px;
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    display:flex;align-items:center;gap:7px;
+  }
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+  .dot.A{background:var(--rust);}
+  .dot.HD{background:var(--amber);}
+  .dot.E{background:var(--slate);}
+  .dot.P{background:var(--green);}
+  ul.plist{margin:0;padding:0;list-style:none;}
+  ul.plist li{
+    font-size:13px;padding:5px 0;border-bottom:1px dashed #ece5d3;display:flex;justify-content:space-between;
+  }
+  ul.plist li:last-child{border-bottom:none;}
+  .empty-note{font-size:12.5px;color:var(--muted);font-style:italic;}
+  .count-chip{
+    font-size:10.5px;background:#f1ede0;color:var(--slate);padding:1px 7px;border-radius:20px;font-weight:700;
+  }
+
+  /* weekly */
+  .week-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .week-nav button{
+    border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 10px;font-size:13px;cursor:pointer;
+  }
+  .week-range{font-size:13px;font-weight:700;}
+  table.wk{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:12px;}
+  table.wk th, table.wk td{padding:7px 5px;text-align:center;border-bottom:1px solid #eee7d6;}
+  table.wk th{background:#efeadb;font-size:10.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--slate);}
+  table.wk td.stuname{text-align:left;font-weight:600;font-size:11.5px;padding-left:10px;}
+  table.wk tr:last-child td{border-bottom:none;}
+  .cell-A{color:var(--rust);font-weight:800;}
+  .cell-HD{color:var(--amber);font-weight:800;}
+  .cell-E{color:var(--slate);font-weight:800;}
+  .cell-P{color:#c9c2ac;}
+  .cell-blank{color:#ddd7c4;}
+
+  .toast{
+    position:fixed;left:50%;bottom:22px;transform:translateX(-50%);
+    background:var(--green-dark);color:#fff;padding:10px 18px;border-radius:30px;
+    font-size:13px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.2);
+    opacity:0;pointer-events:none;transition:opacity .25s;
+  }
+  .toast.show{opacity:1;}
+
+  .legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--slate);margin-top:8px;}
+  .legend span{display:flex;align-items:center;gap:4px;}
+
+  .backup-row{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:14px;gap:8px;flex-wrap:wrap;
+  }
+  .saved-note{font-size:11px;color:var(--muted);font-style:italic;}
+  .backup-btns{display:flex;gap:6px;}
+  .mini-btn{
+    border:1px solid var(--line);background:#fff;color:var(--slate);
+    font-size:11px;font-weight:700;padding:5px 10px;border-radius:6px;cursor:pointer;
+  }
+  .mini-btn:active{transform:scale(0.96);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <div>
+      <h1>Class Attendance Checker</h1>
+      <div class="sub">Call the roll &middot; tap a status &middot; get your summary</div>
+    </div>
+    <div class="datebox">
+      <label for="dateInput">Date</label>
+      <input type="date" id="dateInput">
+    </div>
+  </div>
+
+  <div class="backup-row">
+    <span id="lastSavedNote" class="saved-note">Saved on this device</span>
+    <div class="backup-btns">
+      <button class="mini-btn" id="exportBtn">Export Backup</button>
+      <button class="mini-btn" id="importBtn">Import Backup</button>
+      <input type="file" id="importFile" accept="application/json" style="display:none;">
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="today">Today's Roll Call</div>
+    <div class="tab" data-tab="week">Weekly Summary</div>
+  </div>
+
+  <div id="todayPanel">
+    <div class="progress-row">
+      <span id="progressText">0 / 0 called</span>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <span id="loadingNote" style="font-size:11px;"></span>
+    </div>
+
+    <div class="section-label">Male</div>
+    <div class="roster" id="maleRoster"></div>
+
+    <div class="section-label">Female</div>
+    <div class="roster" id="femaleRoster"></div>
+
+    <div class="actions">
+      <button class="action-btn ghost" id="markRestBtn">Mark rest Present</button>
+      <button class="action-btn primary" id="saveDayBtn">Save Day &amp; View Summary</button>
+    </div>
+
+    <div id="dailySummary" style="margin-top:18px;"></div>
+
+    <div class="legend">
+      <span><span class="dot P"></span>Present</span>
+      <span><span class="dot A"></span>Absent</span>
+      <span><span class="dot HD"></span>Half Day</span>
+      <span><span class="dot E"></span>Excused</span>
+    </div>
+  </div>
+
+  <div id="weekPanel" style="display:none;">
+    <div class="week-nav">
+      <button id="prevWeek">&larr; Prev</button>
+      <div class="week-range" id="weekRange"></div>
+      <button id="nextWeek">Next &rarr;</button>
+    </div>
+    <div id="weekContent"></div>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const MALE = ["ABDUA, RONIE JAY DALIGDIG","ARBOSO, XIAN VICELS ASTRONOMO","ARQUIZAL FRANKLIN, SALUTA","EBRAHIM, RASTY, MODAPIL","EDPALINA, ROCKY JR, DIEGO","ENGKOT, RENZ, SINGSON","ESTIOCA, JAYDEN, TORMIS","JANI, KHALID NAWI","LIGAN, MARK KEVIN LADION","LOREÑA, RENZ JOY ANTIGA","MACALUNDANG, RELAND, GAHUMAN","MASDAL, ALSHARIF","PACQUING, JADE DAKAY","PANDIAL, PRINCE LIANE DEXIMO","PINDO, RANDOLPH NIEL","RIVERA, JAKE REYGIE MAGLON","SAAGUNDO, HELBERT, JR. BOJERES","SALASA, NADJER, PALAO","TAMPIPI, ALKHALID DENAMPO","YUSON, ARGEL LLOYD QUISEO"];
+const FEMALE = ["AGUAM, JANIEN MULOC","APLACA, CHRYSSEIS NICHOLE","APUADO, AALIYAH NICOLE","ARBOSO, AIKA REANNE, DEMAYO","ASILO, JAMITCH, CADOSALE","BALINGIT, SARAH JANE","BANQUIAO, AIRA KIMBERLY PAGENTE","CAPADNGAN, JEMIMAH BASALO","GANTALAO, JESSABELLE","GARCIA, ADLRICH SWEETY","INTOL, LIZ TALISIK","LADIAS, JULIA, KALI","LASPOBRES, JULAICA MODAPIL","LEPALAM, JENIMAE BACAY","LLANES, PRECIOUS JANINE YUBAL","PANGANORON, NOVELYN DAMAD","SALAWADDIN, NORSIMA ODIN","SANCHEZ, ANGEL DIANNE, LARINO","TORAYNO, KRISTINE REIGHN, CORPIN"];
+
+const STATUS_LABEL = {P:"Present", A:"Absent", HD:"Half Day", E:"Excused"};
+
+let currentDate = todayStr();
+let dayData = {}; // {name: 'P'|'A'|'HD'|'E'}
+let weekAnchor = todayStr();
+
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+// ---- Native Promise-Based IndexedDB Engine Wrapper ----
+const DB_NAME = 'AttendanceAppDB';
+const STORE_NAME = 'dailyRecords';
+let db = null;
+
+function initDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 1);
+    request.onupgradeneeded = (e) => {
+      const database = e.target.result;
+      if (!database.objectStoreNames.contains(STORE_NAME)) {
+        database.createObjectStore(STORE_NAME);
+      }
+    };
+    request.onsuccess = (e) => {
+      db = e.target.result;
+      resolve(db);
+    };
+    request.onerror = (e) => reject(e.target.error);
+  });
+}
+
+function dbGet(key) {
+  return new Promise((resolve, reject) => {
+    if (!db) return resolve(null);
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+    const req = store.get(key);
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function dbSet(key, value) {
+  return new Promise((resolve, reject) => {
+    if (!db) return resolve(false);
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    const req = store.put(value, key);
+    req.onsuccess = () => resolve(true);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function dbGetAllAttendanceKeys() {
+  return new Promise((resolve, reject) => {
+    if (!db) return resolve([]);
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+    const req = store.getAllKeys();
+    req.onsuccess = () => {
+      const keys = req.result.filter(k => typeof k === 'string' && k.startsWith('attendance:'));
+      resolve(keys);
+    };
+    req.onerror = () => reject(req.error);
+  });
+}
+
+// ---- UI LifeCycle Operations ----
+async function loadDay(dateStr){
+  document.getElementById('loadingNote').textContent = "loading...";
+  try {
+    const data = await dbGet('attendance:'+dateStr);
+    dayData = data || {};
+  } catch(e) {
+    console.error('Database read failure', e);
+    dayData = {};
+  }
+  document.getElementById('loadingNote').textContent = "";
+  renderRoster();
+}
+
+async function saveDay(){
+  const ok = await dbSet('attendance:'+currentDate, dayData);
+  updateLastSaved();
+  return ok;
+}
+
+function updateLastSaved(){
+  const el = document.getElementById('lastSavedNote');
+  if(!el) return;
+  const now = new Date();
+  const t = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  el.textContent = 'Last saved to database ' + t;
+}
+
+async function setStatus(name, status){
+  if(dayData[name] === status){
+    delete dayData[name]; // tap again to clear
+  }else{
+    dayData[name] = status;
+  }
+  renderRoster(); // Snap update instantly for visual responsiveness
+  await saveDay(); // Silently dispatch database write task
+}
+
+function studentRowHTML(name, idx){
+  const st = dayData[name];
+  const tagColor = st === 'A' ? 'var(--rust)' : st==='HD' ? 'var(--amber)' : st==='E' ? 'var(--slate)' : 'var(--green)';
+  const tag = st ? `<span class="status-tag" style="background:${tagColor}1a;color:${tagColor}">${STATUS_LABEL[st]}</span>` : '';
+  return `
+  <div class="row ${st?'done':''}">
+    <span class="no">${idx}</span>
+    <span class="name"><span class="full">${titleCase(name)}</span>${tag}</span>
+    <div class="btns">
+      <button class="btn P ${st==='P'?'on':''}" data-name="${escapeAttr(name)}" data-status="P">P</button>
+      <button class="btn A ${st==='A'?'on':''}" data-name="${escapeAttr(name)}" data-status="A">A</button>
+      <button class="btn HD ${st==='HD'?'on':''}" data-name="${escapeAttr(name)}" data-status="HD">HD</button>
+      <button class="btn E ${st==='E'?'on':''}" data-name="${escapeAttr(name)}" data-status="E">E</button>
+    </div>
+  </div>`;
+}
+
+function titleCase(s){
+  return s.toLowerCase().replace(/\b\w/g, c=>c.toUpperCase()).replace(/\s+,/g, ',');
+}
+function escapeAttr(s){
+  return s.replace(/"/g,'&quot;');
+}
+
+function renderRoster(){
+  const maleEl = document.getElementById('maleRoster');
+  const femaleEl = document.getElementById('femaleRoster');
+  maleEl.innerHTML = MALE.map((n,i)=>studentRowHTML(n,i+1)).join('');
+  femaleEl.innerHTML = FEMALE.map((n,i)=>studentRowHTML(n,i+1)).join('');
+
+  document.querySelectorAll('.btn').forEach(b=>{
+    b.onclick = null; // Purge old hooks
+    b.addEventListener('click', ()=>{
+      setStatus(b.dataset.name, b.dataset.status);
+    });
+  });
+
+  const all = [...MALE, ...FEMALE];
+  const called = all.filter(n=>dayData[n]).length;
+  document.getElementById('progressText').textContent = `${called} / ${all.length} called`;
+  document.getElementById('progressFill').style.width = (called/all.length*100)+'%';
+}
+
+async function markRestPresent(){
+  [...MALE, ...FEMALE].forEach(n=>{
+    if(!dayData[n]) dayData[n] = 'P';
+  });
+  renderRoster();
+  await saveDay();
+  showToast('Remaining students marked Present');
+}
+
+function renderDailySummary(){
+  const all = [...MALE, ...FEMALE];
+  const groups = {A:[], HD:[], E:[]};
+  all.forEach(n=>{
+    const st = dayData[n];
+    if(st==='A') groups.A.push(n);
+    if(st==='HD') groups.HD.push(n);
+    if(st==='E') groups.E.push(n);
+  });
+  const present = all.filter(n=>dayData[n]==='P').length;
+
+  const cardHTML = (label, cls, list) => `
+    <div class="summary-card">
+      <h3><span class="dot ${cls}"></span>${label} <span class="count-chip">${list.length}</span></h3>
+      ${list.length ? `<ul class="plist">${list.map(n=>`<li>${titleCase(n)}</li>`).join('')}</ul>` : `<div class="empty-note">No students ${label.toLowerCase()} today.</div>`}
+    </div>`;
+
+  const dateLabel = new Date(currentDate+'T00:00:00').toLocaleDateString('en-US',{weekday:'long', month:'long', day:'numeric', year:'numeric'});
+
+  document.getElementById('dailySummary').innerHTML = `
+    <div class="section-label">End of Day Summary — ${dateLabel}</div>
+    <div class="summary-card">
+      <h3><span class="dot P"></span>Present <span class="count-chip">${present} / ${all.length}</span></h3>
+    </div>
+    ${cardHTML('Absent','A',groups.A)}
+    ${cardHTML('Half Day','HD',groups.HD)}
+    ${cardHTML('Excused','E',groups.E)}
+  `;
+}
+
+// ---- Weekly ----
+function getMonday(dateStr){
+  const d = new Date(dateStr+'T00:00:00');
+  const day = d.getDay(); // 0=Sun
+  const diff = day===0 ? -6 : 1-day;
+  d.setDate(d.getDate()+diff);
+  return d;
+}
+function fmt(d){
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function weekDates(anchorStr){
+  const mon = getMonday(anchorStr);
+  const dates = [];
+  for(let i=0;i<5;i++){ // Mon-Fri
+    const d = new Date(mon);
+    d.setDate(mon.getDate()+i);
+    dates.push(fmt(d));
+  }
+  return dates;
+}
+
+async function renderWeek(){
+  const dates = weekDates(weekAnchor);
+  const rangeLabel = new Date(dates[0]+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) +
+    ' – ' + new Date(dates[4]+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('weekRange').textContent = rangeLabel;
+
+  document.getElementById('weekContent').innerHTML = '<div class="empty-note">Loading week from Database...</div>';
+
+  // Handle asynchronous IndexedDB batch collection via Promise.all
+  const dayLoads = await Promise.all(dates.map(d => dbGet('attendance:'+d)));
+
+  const all = [...MALE, ...FEMALE];
+  const dayHeaders = ['M','T','W','TH','F'];
+
+  let rows = all.map(name=>{
+    const cells = dayLoads.map(dd=>{
+      if(!dd) return '<td class="cell-blank">–</td>';
+      const st = dd[name];
+      if(!st) return '<td class="cell-blank">–</td>';
+      return `<td class="cell-${st}">${st}</td>`;
+    }).join('');
+    return `<tr><td class="stuname">${titleCase(name)}</td>${cells}</tr>`;
+  }).join('');
+
+  const table = `
+    <table class="wk">
+      <thead><tr><th style="text-align:left;padding-left:10px;">Student</th>${dayHeaders.map(h=>`<th>${h}</th>`).join('')}</tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+
+  // Weekly summary counts
+  const summary = {A:{}, HD:{}, E:{}};
+  all.forEach(n=>{summary.A[n]=0;summary.HD[n]=0;summary.E[n]=0;});
+  dayLoads.forEach(dd=>{
+    if(!dd) return;
+    Object.entries(dd).forEach(([n,st])=>{
+      if(summary[st] && summary[st][n]!==undefined) summary[st][n]++;
+    });
+  });
+
+  const buildList = (label,cls,obj)=>{
+    const entries = Object.entries(obj).filter(([n,c])=>c>0).sort((a,b)=>b[1]-a[1]);
+    return `<div class="summary-card">
+      <h3><span class="dot ${cls}"></span>${label} this week <span class="count-chip">${entries.length} students</span></h3>
+      ${entries.length ? `<ul class="plist">${entries.map(([n,c])=>`<li>${titleCase(n)} <span class="count-chip">${c}x</span></li>`).join('')}</ul>` : `<div class="empty-note">No ${label.toLowerCase()} records this week.</div>`}
+    </div>`;
+  };
+
+  const recordedDays = dayLoads.filter(Boolean).length;
+
+  document.getElementById('weekContent').innerHTML = `
+    <div class="section-label">Daily Grid (${recordedDays}/5 days recorded)</div>
+    ${table}
+    <div class="section-label" style="margin-top:18px;">Weekly Summary</div>
+    ${buildList('Absent','A',summary.A)}
+    ${buildList('Half Day','HD',summary.HD)}
+    ${buildList('Excused','E',summary.E)}
+  `;
+}
+
+// ---- UI Interactivity Wireup ----
+document.getElementById('dateInput').value = currentDate;
+document.getElementById('dateInput').addEventListener('change', (e)=>{
+  currentDate = e.target.value;
+  weekAnchor = currentDate;
+  document.getElementById('dailySummary').innerHTML = '';
+  loadDay(currentDate);
+});
+
+document.getElementById('markRestBtn').addEventListener('click', markRestPresent);
+document.getElementById('saveDayBtn').addEventListener('click', async ()=>{
+  const ok = await saveDay();
+  renderDailySummary();
+  showToast(ok ? 'Day saved to DB' : 'Save failed — please retry');
+  document.getElementById('dailySummary').scrollIntoView({behavior:'smooth'});
+});
+
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    if(t.dataset.tab==='today'){
+      document.getElementById('todayPanel').style.display='';
+      document.getElementById('weekPanel').style.display='none';
+    }else{
+      document.getElementById('todayPanel').style.display='none';
+      document.getElementById('weekPanel').style.display='';
+      weekAnchor = currentDate;
+      renderWeek();
+    }
+  });
+});
+
+document.getElementById('prevWeek').addEventListener('click', ()=>{
+  const d = new Date(weekAnchor+'T00:00:00');
+  d.setDate(d.getDate()-7);
+  weekAnchor = fmt(d);
+  renderWeek();
+});
+document.getElementById('nextWeek').addEventListener('click', ()=>{
+  const d = new Date(weekAnchor+'T00:00:00');
+  d.setDate(d.getDate()+7);
+  weekAnchor = fmt(d);
+  renderWeek();
+});
+
+// ---- Async Backup / Restore Procedures ----
+async function exportBackup(){
+  try {
+    const keys = await dbGetAllAttendanceKeys();
+    const backup = {};
+    for (const k of keys) {
+      backup[k] = await dbGet(k);
+    }
+    const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = todayStr();
+    a.href = url;
+    a.download = `attendance-db-backup-${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('DB Backup file downloaded');
+  } catch(e) {
+    console.error(e);
+    showToast('Export engine failure');
+  }
+}
+
+function importBackup(file){
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try{
+      const parsed = JSON.parse(e.target.result);
+      let count = 0;
+      for (const [k, v] of Object.entries(parsed)) {
+        if(k.startsWith('attendance:')){
+          await dbSet(k, v);
+          count++;
+        }
+      }
+      showToast(`Restored ${count} records into IndexedDB`);
+      await loadDay(currentDate);
+    }catch(err){
+      console.error(err);
+      showToast('Import execution rejected — file format corrupted');
+    }
+  };
+  reader.readAsText(file);
+}
+
+document.getElementById('exportBtn').addEventListener('click', exportBackup);
+document.getElementById('importBtn').addEventListener('click', ()=>{
+  document.getElementById('importFile').click();
+});
+document.getElementById('importFile').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(file) importBackup(file);
+  e.target.value = '';
+});
+
+// Run Initial Engine Boot sequence
+initDB().then(() => {
+  loadDay(currentDate);
+  updateLastSaved();
+}).catch(err => {
+  console.error("Critical Failure: DB failed initialization", err);
+  document.getElementById('loadingNote').textContent = "Database Error!";
+  showToast("Storage initialization failed.");
+});
+</script>
+</body>
+</html>
