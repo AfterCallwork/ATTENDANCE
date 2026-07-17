@@ -15,6 +15,9 @@
     --rust:#a44a3f;
     --slate:#5c6b7a;
     --muted:#8b8574;
+    --tardy:#c49a2c;
+    --late:#c1662c;
+    --skip:#7a4189;
   }
   *{box-sizing:border-box;}
   body{
@@ -24,6 +27,7 @@
     color:var(--ink);
   }
   .wrap{max-width:720px;margin:0 auto;padding:18px 14px 60px;}
+  @media (orientation:landscape){ .wrap{max-width:1100px;} }
 
   /* header */
   .masthead{
@@ -122,13 +126,13 @@
     padding:1px 6px;
     border-radius:4px;
   }
-  .btns{display:flex;gap:5px;flex-shrink:0;}
+  .btns{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px;flex-shrink:0;max-width:168px;}
   .btn{
     border:1px solid var(--line);
     background:#fff;
-    font-size:11.5px;
+    font-size:10.5px;
     font-weight:700;
-    padding:6px 9px;
+    padding:5px 7px;
     border-radius:6px;
     cursor:pointer;
     color:var(--slate);
@@ -139,6 +143,9 @@
   .btn.A.on{background:var(--rust);border-color:var(--rust);color:#fff;}
   .btn.HD.on{background:var(--amber);border-color:var(--amber);color:#fff;}
   .btn.E.on{background:var(--slate);border-color:var(--slate);color:#fff;}
+  .btn.T.on{background:var(--tardy);border-color:var(--tardy);color:#fff;}
+  .btn.L.on{background:var(--late);border-color:var(--late);color:#fff;}
+  .btn.SK.on{background:var(--skip);border-color:var(--skip);color:#fff;}
 
   .actions{display:flex;gap:8px;margin-top:16px;}
   .action-btn{
@@ -173,6 +180,9 @@
   .dot.HD{background:var(--amber);}
   .dot.E{background:var(--slate);}
   .dot.P{background:var(--green);}
+  .dot.T{background:var(--tardy);}
+  .dot.L{background:var(--late);}
+  .dot.SK{background:var(--skip);}
   ul.plist{margin:0;padding:0;list-style:none;}
   ul.plist li{
     font-size:13px;padding:5px 0;border-bottom:1px dashed #ece5d3;display:flex;justify-content:space-between;
@@ -197,6 +207,9 @@
   .cell-A{color:var(--rust);font-weight:800;}
   .cell-HD{color:var(--amber);font-weight:800;}
   .cell-E{color:var(--slate);font-weight:800;}
+  .cell-T{color:var(--tardy);font-weight:800;}
+  .cell-L{color:var(--late);font-weight:800;}
+  .cell-SK{color:var(--skip);font-weight:800;}
   .cell-P{color:#c9c2ac;}
   .cell-blank{color:#ddd7c4;}
 
@@ -210,6 +223,29 @@
 
   .legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--slate);margin-top:8px;}
   .legend span{display:flex;align-items:center;gap:4px;}
+
+  /* full class overview — landscape multi-column */
+  .full-overview{
+    background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px;
+  }
+  .full-overview h3{
+    margin:0 0 4px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;
+  }
+  .full-overview .hint{font-size:10.5px;color:var(--muted);font-style:italic;text-transform:none;letter-spacing:0;font-weight:400;}
+  .full-grid{column-count:1;column-gap:16px;margin-top:8px;}
+  @media (min-width:560px){ .full-grid{column-count:2;} }
+  @media (orientation:landscape) and (min-width:560px){ .full-grid{column-count:3;} }
+  @media (orientation:landscape) and (min-width:900px){ .full-grid{column-count:4;} }
+  .full-item{
+    display:flex;justify-content:space-between;align-items:center;gap:8px;
+    padding:5px 0;border-bottom:1px dashed #ece5d3;font-size:12px;
+    break-inside:avoid;-webkit-column-break-inside:avoid;
+  }
+  .full-item .fno{color:var(--muted);font-size:10px;width:16px;flex-shrink:0;}
+  .full-item .fname{font-weight:600;flex:1;min-width:0;}
+  .full-item .fstatus{
+    font-weight:800;font-size:10px;padding:2px 7px;border-radius:10px;flex-shrink:0;white-space:nowrap;
+  }
 
   .backup-row{
     display:flex;align-items:center;justify-content:space-between;
@@ -277,6 +313,9 @@
       <span><span class="dot A"></span>Absent</span>
       <span><span class="dot HD"></span>Half Day</span>
       <span><span class="dot E"></span>Excused</span>
+      <span><span class="dot T"></span>Tardy</span>
+      <span><span class="dot L"></span>Late</span>
+      <span><span class="dot SK"></span>Skipped</span>
     </div>
   </div>
 
@@ -296,10 +335,11 @@
 const MALE = ["ABDUA, RONIE JAY DALIGDIG","ARBOSO, XIAN VICELS ASTRONOMO","ARQUIZAL FRANKLIN, SALUTA","EBRAHIM, RASTY, MODAPIL","EDPALINA, ROCKY JR, DIEGO","ENGKOT, RENZ, SINGSON","ESTIOCA, JAYDEN, TORMIS","JANI, KHALID NAWI","LIGAN, MARK KEVIN LADION","LOREÑA, RENZ JOY ANTIGA","MACALUNDANG, RELAND, GAHUMAN","MASDAL, ALSHARIF","PACQUING, JADE DAKAY","PANDIAL, PRINCE LIANE DEXIMO","PINDO, RANDOLPH NIEL","RIVERA, JAKE REYGIE MAGLON","SAAGUNDO, HELBERT, JR. BOJERES","SALASA, NADJER, PALAO","TAMPIPI, ALKHALID DENAMPO","YUSON, ARGEL LLOYD QUISEO"];
 const FEMALE = ["AGUAM, JANIEN MULOC","APLACA, CHRYSSEIS NICHOLE","APUADO, AALIYAH NICOLE","ARBOSO, AIKA REANNE, DEMAYO","ASILO, JAMITCH, CADOSALE","BALINGIT, SARAH JANE","BANQUIAO, AIRA KIMBERLY PAGENTE","CAPADNGAN, JEMIMAH BASALO","GANTALAO, JESSABELLE","GARCIA, ADLRICH SWEETY","INTOL, LIZ TALISIK","LADIAS, JULIA, KALI","LASPOBRES, JULAICA MODAPIL","LEPALAM, JENIMAE BACAY","LLANES, PRECIOUS JANINE YUBAL","PANGANORON, NOVELYN DAMAD","SALAWADDIN, NORSIMA ODIN","SANCHEZ, ANGEL DIANNE, LARINO","TORAYNO, KRISTINE REIGHN, CORPIN"];
 
-const STATUS_LABEL = {P:"Present", A:"Absent", HD:"Half Day", E:"Excused"};
+const STATUS_LABEL = {P:"Present", A:"Absent", HD:"Half Day", E:"Excused", T:"Tardy", L:"Late", SK:"Skipped"};
+const STATUS_COLOR = {P:'var(--green)', A:'var(--rust)', HD:'var(--amber)', E:'var(--slate)', T:'var(--tardy)', L:'var(--late)', SK:'var(--skip)'};
 
 let currentDate = todayStr();
-let dayData = {}; // {name: 'P'|'A'|'HD'|'E'}
+let dayData = {}; // {name: 'P'|'A'|'HD'|'E'|'T'|'L'|'SK'}
 let weekAnchor = todayStr();
 
 function todayStr(){
@@ -412,7 +452,7 @@ async function setStatus(name, status){
 
 function studentRowHTML(name, idx){
   const st = dayData[name];
-  const tagColor = st === 'A' ? 'var(--rust)' : st==='HD' ? 'var(--amber)' : st==='E' ? 'var(--slate)' : 'var(--green)';
+  const tagColor = st ? (STATUS_COLOR[st] || 'var(--green)') : 'var(--green)';
   const tag = st ? `<span class="status-tag" style="background:${tagColor}1a;color:${tagColor}">${STATUS_LABEL[st]}</span>` : '';
   return `
   <div class="row ${st?'done':''}">
@@ -423,6 +463,9 @@ function studentRowHTML(name, idx){
       <button class="btn A ${st==='A'?'on':''}" data-name="${escapeAttr(name)}" data-status="A">A</button>
       <button class="btn HD ${st==='HD'?'on':''}" data-name="${escapeAttr(name)}" data-status="HD">HD</button>
       <button class="btn E ${st==='E'?'on':''}" data-name="${escapeAttr(name)}" data-status="E">E</button>
+      <button class="btn T ${st==='T'?'on':''}" data-name="${escapeAttr(name)}" data-status="T">T</button>
+      <button class="btn L ${st==='L'?'on':''}" data-name="${escapeAttr(name)}" data-status="L">L</button>
+      <button class="btn SK ${st==='SK'?'on':''}" data-name="${escapeAttr(name)}" data-status="SK">SK</button>
     </div>
   </div>`;
 }
@@ -462,14 +505,36 @@ async function markRestPresent(){
   showToast('Remaining students marked Present');
 }
 
+function fullOverviewHTML(){
+  const all = [...MALE, ...FEMALE];
+  const items = all.map((n,i)=>{
+    const st = dayData[n];
+    const label = st ? STATUS_LABEL[st] : 'Not Marked';
+    const color = st ? (STATUS_COLOR[st] || 'var(--slate)') : '#b7b0a0';
+    return `<div class="full-item">
+      <span class="fno">${i+1}</span>
+      <span class="fname">${titleCase(n)}</span>
+      <span class="fstatus" style="background:${color}1a;color:${color}">${label}</span>
+    </div>`;
+  }).join('');
+  return `
+    <div class="full-overview">
+      <h3>All Students — One View <span class="hint">Rotate to landscape for more columns</span></h3>
+      <div class="full-grid">${items}</div>
+    </div>`;
+}
+
 function renderDailySummary(){
   const all = [...MALE, ...FEMALE];
-  const groups = {A:[], HD:[], E:[]};
+  const groups = {A:[], HD:[], E:[], T:[], L:[], SK:[]};
   all.forEach(n=>{
     const st = dayData[n];
     if(st==='A') groups.A.push(n);
     if(st==='HD') groups.HD.push(n);
     if(st==='E') groups.E.push(n);
+    if(st==='T') groups.T.push(n);
+    if(st==='L') groups.L.push(n);
+    if(st==='SK') groups.SK.push(n);
   });
   const present = all.filter(n=>dayData[n]==='P').length;
 
@@ -483,12 +548,16 @@ function renderDailySummary(){
 
   document.getElementById('dailySummary').innerHTML = `
     <div class="section-label">End of Day Summary — ${dateLabel}</div>
+    ${fullOverviewHTML()}
     <div class="summary-card">
       <h3><span class="dot P"></span>Present <span class="count-chip">${present} / ${all.length}</span></h3>
     </div>
     ${cardHTML('Absent','A',groups.A)}
     ${cardHTML('Half Day','HD',groups.HD)}
     ${cardHTML('Excused','E',groups.E)}
+    ${cardHTML('Tardy','T',groups.T)}
+    ${cardHTML('Late','L',groups.L)}
+    ${cardHTML('Skipped','SK',groups.SK)}
   `;
 }
 
@@ -545,8 +614,8 @@ async function renderWeek(){
     </table>`;
 
   // Weekly summary counts
-  const summary = {A:{}, HD:{}, E:{}};
-  all.forEach(n=>{summary.A[n]=0;summary.HD[n]=0;summary.E[n]=0;});
+  const summary = {A:{}, HD:{}, E:{}, T:{}, L:{}, SK:{}};
+  all.forEach(n=>{summary.A[n]=0;summary.HD[n]=0;summary.E[n]=0;summary.T[n]=0;summary.L[n]=0;summary.SK[n]=0;});
   dayLoads.forEach(dd=>{
     if(!dd) return;
     Object.entries(dd).forEach(([n,st])=>{
@@ -571,6 +640,9 @@ async function renderWeek(){
     ${buildList('Absent','A',summary.A)}
     ${buildList('Half Day','HD',summary.HD)}
     ${buildList('Excused','E',summary.E)}
+    ${buildList('Tardy','T',summary.T)}
+    ${buildList('Late','L',summary.L)}
+    ${buildList('Skipped','SK',summary.SK)}
   `;
 }
 
